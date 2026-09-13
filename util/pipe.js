@@ -1,5 +1,9 @@
 import { identity } from './identity';
-export function pipe(...fns) {
+export function pipe() {
+    var fns = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        fns[_i] = arguments[_i];
+    }
     return pipeFromArray(fns);
 }
 export function pipeFromArray(fns) {
@@ -10,7 +14,7 @@ export function pipeFromArray(fns) {
         return fns[0];
     }
     return function piped(input) {
-        return fns.reduce((prev, fn) => fn(prev), input);
+        return fns.reduce(function (prev, fn) { return fn(prev); }, input);
     };
 }
 //# sourceMappingURL=pipe.js.map

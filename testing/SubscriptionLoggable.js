@@ -1,16 +1,18 @@
 import { SubscriptionLog } from './SubscriptionLog';
-export class SubscriptionLoggable {
-    constructor() {
+var SubscriptionLoggable = (function () {
+    function SubscriptionLoggable() {
         this.subscriptions = [];
     }
-    logSubscribedFrame() {
+    SubscriptionLoggable.prototype.logSubscribedFrame = function () {
         this.subscriptions.push(new SubscriptionLog(this.scheduler.now()));
         return this.subscriptions.length - 1;
-    }
-    logUnsubscribedFrame(index) {
-        const subscriptionLogs = this.subscriptions;
-        const oldSubscriptionLog = subscriptionLogs[index];
+    };
+    SubscriptionLoggable.prototype.logUnsubscribedFrame = function (index) {
+        var subscriptionLogs = this.subscriptions;
+        var oldSubscriptionLog = subscriptionLogs[index];
         subscriptionLogs[index] = new SubscriptionLog(oldSubscriptionLog.subscribedFrame, this.scheduler.now());
-    }
-}
+    };
+    return SubscriptionLoggable;
+}());
+export { SubscriptionLoggable };
 //# sourceMappingURL=SubscriptionLoggable.js.map

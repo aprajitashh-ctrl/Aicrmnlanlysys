@@ -1,34 +1,39 @@
+import { __extends } from "tslib";
 import { Observable } from '../Observable';
 import { Subscription } from '../Subscription';
 import { SubscriptionLoggable } from './SubscriptionLoggable';
 import { applyMixins } from '../util/applyMixins';
 import { observeNotification } from '../Notification';
-export class ColdObservable extends Observable {
-    constructor(messages, scheduler) {
-        super(function (subscriber) {
-            const observable = this;
-            const index = observable.logSubscribedFrame();
-            const subscription = new Subscription();
-            subscription.add(new Subscription(() => {
+var ColdObservable = (function (_super) {
+    __extends(ColdObservable, _super);
+    function ColdObservable(messages, scheduler) {
+        var _this = _super.call(this, function (subscriber) {
+            var observable = this;
+            var index = observable.logSubscribedFrame();
+            var subscription = new Subscription();
+            subscription.add(new Subscription(function () {
                 observable.logUnsubscribedFrame(index);
             }));
             observable.scheduleMessages(subscriber);
             return subscription;
-        });
-        this.messages = messages;
-        this.subscriptions = [];
-        this.scheduler = scheduler;
+        }) || this;
+        _this.messages = messages;
+        _this.subscriptions = [];
+        _this.scheduler = scheduler;
+        return _this;
     }
-    scheduleMessages(subscriber) {
-        const messagesLength = this.messages.length;
-        for (let i = 0; i < messagesLength; i++) {
-            const message = this.messages[i];
-            subscriber.add(this.scheduler.schedule((state) => {
-                const { message: { notification }, subscriber: destination } = state;
+    ColdObservable.prototype.scheduleMessages = function (subscriber) {
+        var messagesLength = this.messages.length;
+        for (var i = 0; i < messagesLength; i++) {
+            var message = this.messages[i];
+            subscriber.add(this.scheduler.schedule(function (state) {
+                var _a = state, notification = _a.message.notification, destination = _a.subscriber;
                 observeNotification(notification, destination);
-            }, message.frame, { message, subscriber }));
+            }, message.frame, { message: message, subscriber: subscriber }));
         }
-    }
-}
+    };
+    return ColdObservable;
+}(Observable));
+export { ColdObservable };
 applyMixins(ColdObservable, [SubscriptionLoggable]);
 //# sourceMappingURL=ColdObservable.js.map

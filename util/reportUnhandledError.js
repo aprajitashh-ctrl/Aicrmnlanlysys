@@ -1,8 +1,8 @@
 import { config } from '../config';
 import { timeoutProvider } from '../scheduler/timeoutProvider';
 export function reportUnhandledError(err) {
-    timeoutProvider.setTimeout(() => {
-        const { onUnhandledError } = config;
+    timeoutProvider.setTimeout(function () {
+        var onUnhandledError = config.onUnhandledError;
         if (onUnhandledError) {
             onUnhandledError(err);
         }

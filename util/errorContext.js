@@ -1,14 +1,14 @@
 import { config } from '../config';
-let context = null;
+var context = null;
 export function errorContext(cb) {
     if (config.useDeprecatedSynchronousErrorHandling) {
-        const isRoot = !context;
+        var isRoot = !context;
         if (isRoot) {
             context = { errorThrown: false, error: null };
         }
         cb();
         if (isRoot) {
-            const { errorThrown, error } = context;
+            var _a = context, errorThrown = _a.errorThrown, error = _a.error;
             context = null;
             if (errorThrown) {
                 throw error;

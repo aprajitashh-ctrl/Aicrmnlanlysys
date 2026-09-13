@@ -1,3 +1,4 @@
+import { __extends, __read, __spreadArray, __values } from "tslib";
 import { Observable } from '../Observable';
 import { ColdObservable } from './ColdObservable';
 import { HotObservable } from './HotObservable';
@@ -10,154 +11,162 @@ import { animationFrameProvider } from '../scheduler/animationFrameProvider';
 import { immediateProvider } from '../scheduler/immediateProvider';
 import { intervalProvider } from '../scheduler/intervalProvider';
 import { timeoutProvider } from '../scheduler/timeoutProvider';
-const defaultMaxFrame = 750;
-export class TestScheduler extends VirtualTimeScheduler {
-    constructor(assertDeepEqual) {
-        super(VirtualAction, defaultMaxFrame);
-        this.assertDeepEqual = assertDeepEqual;
-        this.hotObservables = [];
-        this.coldObservables = [];
-        this.flushTests = [];
-        this.runMode = false;
+var defaultMaxFrame = 750;
+var TestScheduler = (function (_super) {
+    __extends(TestScheduler, _super);
+    function TestScheduler(assertDeepEqual) {
+        var _this = _super.call(this, VirtualAction, defaultMaxFrame) || this;
+        _this.assertDeepEqual = assertDeepEqual;
+        _this.hotObservables = [];
+        _this.coldObservables = [];
+        _this.flushTests = [];
+        _this.runMode = false;
+        return _this;
     }
-    createTime(marbles) {
-        const indexOf = this.runMode ? marbles.trim().indexOf('|') : marbles.indexOf('|');
+    TestScheduler.prototype.createTime = function (marbles) {
+        var indexOf = this.runMode ? marbles.trim().indexOf('|') : marbles.indexOf('|');
         if (indexOf === -1) {
             throw new Error('marble diagram for time should have a completion marker "|"');
         }
         return indexOf * TestScheduler.frameTimeFactor;
-    }
-    createColdObservable(marbles, values, error) {
+    };
+    TestScheduler.prototype.createColdObservable = function (marbles, values, error) {
         if (marbles.indexOf('^') !== -1) {
             throw new Error('cold observable cannot have subscription offset "^"');
         }
         if (marbles.indexOf('!') !== -1) {
             throw new Error('cold observable cannot have unsubscription marker "!"');
         }
-        const messages = TestScheduler.parseMarbles(marbles, values, error, undefined, this.runMode);
-        const cold = new ColdObservable(messages, this);
+        var messages = TestScheduler.parseMarbles(marbles, values, error, undefined, this.runMode);
+        var cold = new ColdObservable(messages, this);
         this.coldObservables.push(cold);
         return cold;
-    }
-    createHotObservable(marbles, values, error) {
+    };
+    TestScheduler.prototype.createHotObservable = function (marbles, values, error) {
         if (marbles.indexOf('!') !== -1) {
             throw new Error('hot observable cannot have unsubscription marker "!"');
         }
-        const messages = TestScheduler.parseMarbles(marbles, values, error, undefined, this.runMode);
-        const subject = new HotObservable(messages, this);
+        var messages = TestScheduler.parseMarbles(marbles, values, error, undefined, this.runMode);
+        var subject = new HotObservable(messages, this);
         this.hotObservables.push(subject);
         return subject;
-    }
-    materializeInnerObservable(observable, outerFrame) {
-        const messages = [];
+    };
+    TestScheduler.prototype.materializeInnerObservable = function (observable, outerFrame) {
+        var _this = this;
+        var messages = [];
         observable.subscribe({
-            next: (value) => {
-                messages.push({ frame: this.frame - outerFrame, notification: nextNotification(value) });
+            next: function (value) {
+                messages.push({ frame: _this.frame - outerFrame, notification: nextNotification(value) });
             },
-            error: (error) => {
-                messages.push({ frame: this.frame - outerFrame, notification: errorNotification(error) });
+            error: function (error) {
+                messages.push({ frame: _this.frame - outerFrame, notification: errorNotification(error) });
             },
-            complete: () => {
-                messages.push({ frame: this.frame - outerFrame, notification: COMPLETE_NOTIFICATION });
+            complete: function () {
+                messages.push({ frame: _this.frame - outerFrame, notification: COMPLETE_NOTIFICATION });
             },
         });
         return messages;
-    }
-    expectObservable(observable, subscriptionMarbles = null) {
-        const actual = [];
-        const flushTest = { actual, ready: false };
-        const subscriptionParsed = TestScheduler.parseMarblesAsSubscriptions(subscriptionMarbles, this.runMode);
-        const subscriptionFrame = subscriptionParsed.subscribedFrame === Infinity ? 0 : subscriptionParsed.subscribedFrame;
-        const unsubscriptionFrame = subscriptionParsed.unsubscribedFrame;
-        let subscription;
-        this.schedule(() => {
+    };
+    TestScheduler.prototype.expectObservable = function (observable, subscriptionMarbles) {
+        var _this = this;
+        if (subscriptionMarbles === void 0) { subscriptionMarbles = null; }
+        var actual = [];
+        var flushTest = { actual: actual, ready: false };
+        var subscriptionParsed = TestScheduler.parseMarblesAsSubscriptions(subscriptionMarbles, this.runMode);
+        var subscriptionFrame = subscriptionParsed.subscribedFrame === Infinity ? 0 : subscriptionParsed.subscribedFrame;
+        var unsubscriptionFrame = subscriptionParsed.unsubscribedFrame;
+        var subscription;
+        this.schedule(function () {
             subscription = observable.subscribe({
-                next: (x) => {
-                    const value = x instanceof Observable ? this.materializeInnerObservable(x, this.frame) : x;
-                    actual.push({ frame: this.frame, notification: nextNotification(value) });
+                next: function (x) {
+                    var value = x instanceof Observable ? _this.materializeInnerObservable(x, _this.frame) : x;
+                    actual.push({ frame: _this.frame, notification: nextNotification(value) });
                 },
-                error: (error) => {
-                    actual.push({ frame: this.frame, notification: errorNotification(error) });
+                error: function (error) {
+                    actual.push({ frame: _this.frame, notification: errorNotification(error) });
                 },
-                complete: () => {
-                    actual.push({ frame: this.frame, notification: COMPLETE_NOTIFICATION });
+                complete: function () {
+                    actual.push({ frame: _this.frame, notification: COMPLETE_NOTIFICATION });
                 },
             });
         }, subscriptionFrame);
         if (unsubscriptionFrame !== Infinity) {
-            this.schedule(() => subscription.unsubscribe(), unsubscriptionFrame);
+            this.schedule(function () { return subscription.unsubscribe(); }, unsubscriptionFrame);
         }
         this.flushTests.push(flushTest);
-        const { runMode } = this;
+        var runMode = this.runMode;
         return {
-            toBe(marbles, values, errorValue) {
+            toBe: function (marbles, values, errorValue) {
                 flushTest.ready = true;
                 flushTest.expected = TestScheduler.parseMarbles(marbles, values, errorValue, true, runMode);
             },
-            toEqual: (other) => {
+            toEqual: function (other) {
                 flushTest.ready = true;
                 flushTest.expected = [];
-                this.schedule(() => {
+                _this.schedule(function () {
                     subscription = other.subscribe({
-                        next: (x) => {
-                            const value = x instanceof Observable ? this.materializeInnerObservable(x, this.frame) : x;
-                            flushTest.expected.push({ frame: this.frame, notification: nextNotification(value) });
+                        next: function (x) {
+                            var value = x instanceof Observable ? _this.materializeInnerObservable(x, _this.frame) : x;
+                            flushTest.expected.push({ frame: _this.frame, notification: nextNotification(value) });
                         },
-                        error: (error) => {
-                            flushTest.expected.push({ frame: this.frame, notification: errorNotification(error) });
+                        error: function (error) {
+                            flushTest.expected.push({ frame: _this.frame, notification: errorNotification(error) });
                         },
-                        complete: () => {
-                            flushTest.expected.push({ frame: this.frame, notification: COMPLETE_NOTIFICATION });
+                        complete: function () {
+                            flushTest.expected.push({ frame: _this.frame, notification: COMPLETE_NOTIFICATION });
                         },
                     });
                 }, subscriptionFrame);
             },
         };
-    }
-    expectSubscriptions(actualSubscriptionLogs) {
-        const flushTest = { actual: actualSubscriptionLogs, ready: false };
+    };
+    TestScheduler.prototype.expectSubscriptions = function (actualSubscriptionLogs) {
+        var flushTest = { actual: actualSubscriptionLogs, ready: false };
         this.flushTests.push(flushTest);
-        const { runMode } = this;
+        var runMode = this.runMode;
         return {
-            toBe(marblesOrMarblesArray) {
-                const marblesArray = typeof marblesOrMarblesArray === 'string' ? [marblesOrMarblesArray] : marblesOrMarblesArray;
+            toBe: function (marblesOrMarblesArray) {
+                var marblesArray = typeof marblesOrMarblesArray === 'string' ? [marblesOrMarblesArray] : marblesOrMarblesArray;
                 flushTest.ready = true;
                 flushTest.expected = marblesArray
-                    .map((marbles) => TestScheduler.parseMarblesAsSubscriptions(marbles, runMode))
-                    .filter((marbles) => marbles.subscribedFrame !== Infinity);
+                    .map(function (marbles) { return TestScheduler.parseMarblesAsSubscriptions(marbles, runMode); })
+                    .filter(function (marbles) { return marbles.subscribedFrame !== Infinity; });
             },
         };
-    }
-    flush() {
-        const hotObservables = this.hotObservables;
+    };
+    TestScheduler.prototype.flush = function () {
+        var _this = this;
+        var hotObservables = this.hotObservables;
         while (hotObservables.length > 0) {
             hotObservables.shift().setup();
         }
-        super.flush();
-        this.flushTests = this.flushTests.filter((test) => {
+        _super.prototype.flush.call(this);
+        this.flushTests = this.flushTests.filter(function (test) {
             if (test.ready) {
-                this.assertDeepEqual(test.actual, test.expected);
+                _this.assertDeepEqual(test.actual, test.expected);
                 return false;
             }
             return true;
         });
-    }
-    static parseMarblesAsSubscriptions(marbles, runMode = false) {
+    };
+    TestScheduler.parseMarblesAsSubscriptions = function (marbles, runMode) {
+        var _this = this;
+        if (runMode === void 0) { runMode = false; }
         if (typeof marbles !== 'string') {
             return new SubscriptionLog(Infinity);
         }
-        const characters = [...marbles];
-        const len = characters.length;
-        let groupStart = -1;
-        let subscriptionFrame = Infinity;
-        let unsubscriptionFrame = Infinity;
-        let frame = 0;
-        for (let i = 0; i < len; i++) {
-            let nextFrame = frame;
-            const advanceFrameBy = (count) => {
-                nextFrame += count * this.frameTimeFactor;
+        var characters = __spreadArray([], __read(marbles));
+        var len = characters.length;
+        var groupStart = -1;
+        var subscriptionFrame = Infinity;
+        var unsubscriptionFrame = Infinity;
+        var frame = 0;
+        var _loop_1 = function (i) {
+            var nextFrame = frame;
+            var advanceFrameBy = function (count) {
+                nextFrame += count * _this.frameTimeFactor;
             };
-            const c = characters[i];
+            var c = characters[i];
             switch (c) {
                 case ' ':
                     if (!runMode) {
@@ -191,13 +200,13 @@ export class TestScheduler extends VirtualTimeScheduler {
                 default:
                     if (runMode && c.match(/^[0-9]$/)) {
                         if (i === 0 || characters[i - 1] === ' ') {
-                            const buffer = characters.slice(i).join('');
-                            const match = buffer.match(/^([0-9]+(?:\.[0-9]+)?)(ms|s|m) /);
+                            var buffer = characters.slice(i).join('');
+                            var match = buffer.match(/^([0-9]+(?:\.[0-9]+)?)(ms|s|m) /);
                             if (match) {
                                 i += match[0].length - 1;
-                                const duration = parseFloat(match[1]);
-                                const unit = match[2];
-                                let durationInMs;
+                                var duration = parseFloat(match[1]);
+                                var unit = match[2];
+                                var durationInMs = void 0;
                                 switch (unit) {
                                     case 'ms':
                                         durationInMs = duration;
@@ -211,7 +220,7 @@ export class TestScheduler extends VirtualTimeScheduler {
                                     default:
                                         break;
                                 }
-                                advanceFrameBy(durationInMs / this.frameTimeFactor);
+                                advanceFrameBy(durationInMs / this_1.frameTimeFactor);
                                 break;
                             }
                         }
@@ -219,6 +228,12 @@ export class TestScheduler extends VirtualTimeScheduler {
                     throw new Error("there can only be '^' and '!' markers in a " + "subscription marble diagram. Found instead '" + c + "'.");
             }
             frame = nextFrame;
+            out_i_1 = i;
+        };
+        var this_1 = this, out_i_1;
+        for (var i = 0; i < len; i++) {
+            _loop_1(i);
+            i = out_i_1;
         }
         if (unsubscriptionFrame < 0) {
             return new SubscriptionLog(subscriptionFrame);
@@ -226,32 +241,35 @@ export class TestScheduler extends VirtualTimeScheduler {
         else {
             return new SubscriptionLog(subscriptionFrame, unsubscriptionFrame);
         }
-    }
-    static parseMarbles(marbles, values, errorValue, materializeInnerObservables = false, runMode = false) {
+    };
+    TestScheduler.parseMarbles = function (marbles, values, errorValue, materializeInnerObservables, runMode) {
+        var _this = this;
+        if (materializeInnerObservables === void 0) { materializeInnerObservables = false; }
+        if (runMode === void 0) { runMode = false; }
         if (marbles.indexOf('!') !== -1) {
             throw new Error('conventional marble diagrams cannot have the ' + 'unsubscription marker "!"');
         }
-        const characters = [...marbles];
-        const len = characters.length;
-        const testMessages = [];
-        const subIndex = runMode ? marbles.replace(/^[ ]+/, '').indexOf('^') : marbles.indexOf('^');
-        let frame = subIndex === -1 ? 0 : subIndex * -this.frameTimeFactor;
-        const getValue = typeof values !== 'object'
-            ? (x) => x
-            : (x) => {
+        var characters = __spreadArray([], __read(marbles));
+        var len = characters.length;
+        var testMessages = [];
+        var subIndex = runMode ? marbles.replace(/^[ ]+/, '').indexOf('^') : marbles.indexOf('^');
+        var frame = subIndex === -1 ? 0 : subIndex * -this.frameTimeFactor;
+        var getValue = typeof values !== 'object'
+            ? function (x) { return x; }
+            : function (x) {
                 if (materializeInnerObservables && values[x] instanceof ColdObservable) {
                     return values[x].messages;
                 }
                 return values[x];
             };
-        let groupStart = -1;
-        for (let i = 0; i < len; i++) {
-            let nextFrame = frame;
-            const advanceFrameBy = (count) => {
-                nextFrame += count * this.frameTimeFactor;
+        var groupStart = -1;
+        var _loop_2 = function (i) {
+            var nextFrame = frame;
+            var advanceFrameBy = function (count) {
+                nextFrame += count * _this.frameTimeFactor;
             };
-            let notification;
-            const c = characters[i];
+            var notification = void 0;
+            var c = characters[i];
             switch (c) {
                 case ' ':
                     if (!runMode) {
@@ -283,13 +301,13 @@ export class TestScheduler extends VirtualTimeScheduler {
                 default:
                     if (runMode && c.match(/^[0-9]$/)) {
                         if (i === 0 || characters[i - 1] === ' ') {
-                            const buffer = characters.slice(i).join('');
-                            const match = buffer.match(/^([0-9]+(?:\.[0-9]+)?)(ms|s|m) /);
+                            var buffer = characters.slice(i).join('');
+                            var match = buffer.match(/^([0-9]+(?:\.[0-9]+)?)(ms|s|m) /);
                             if (match) {
                                 i += match[0].length - 1;
-                                const duration = parseFloat(match[1]);
-                                const unit = match[2];
-                                let durationInMs;
+                                var duration = parseFloat(match[1]);
+                                var unit = match[2];
+                                var durationInMs = void 0;
                                 switch (unit) {
                                     case 'ms':
                                         durationInMs = duration;
@@ -303,7 +321,7 @@ export class TestScheduler extends VirtualTimeScheduler {
                                     default:
                                         break;
                                 }
-                                advanceFrameBy(durationInMs / this.frameTimeFactor);
+                                advanceFrameBy(durationInMs / this_2.frameTimeFactor);
                                 break;
                             }
                         }
@@ -313,35 +331,43 @@ export class TestScheduler extends VirtualTimeScheduler {
                     break;
             }
             if (notification) {
-                testMessages.push({ frame: groupStart > -1 ? groupStart : frame, notification });
+                testMessages.push({ frame: groupStart > -1 ? groupStart : frame, notification: notification });
             }
             frame = nextFrame;
+            out_i_2 = i;
+        };
+        var this_2 = this, out_i_2;
+        for (var i = 0; i < len; i++) {
+            _loop_2(i);
+            i = out_i_2;
         }
         return testMessages;
-    }
-    createAnimator() {
+    };
+    TestScheduler.prototype.createAnimator = function () {
+        var _this = this;
         if (!this.runMode) {
             throw new Error('animate() must only be used in run mode');
         }
-        let lastHandle = 0;
-        let map;
-        const delegate = {
-            requestAnimationFrame(callback) {
+        var lastHandle = 0;
+        var map;
+        var delegate = {
+            requestAnimationFrame: function (callback) {
                 if (!map) {
                     throw new Error('animate() was not called within run()');
                 }
-                const handle = ++lastHandle;
+                var handle = ++lastHandle;
                 map.set(handle, callback);
                 return handle;
             },
-            cancelAnimationFrame(handle) {
+            cancelAnimationFrame: function (handle) {
                 if (!map) {
                     throw new Error('animate() was not called within run()');
                 }
                 map.delete(handle);
             },
         };
-        const animate = (marbles) => {
+        var animate = function (marbles) {
+            var e_1, _a;
             if (map) {
                 throw new Error('animate() must not be called more than once within run()');
             }
@@ -349,132 +375,168 @@ export class TestScheduler extends VirtualTimeScheduler {
                 throw new Error('animate() must not complete or error');
             }
             map = new Map();
-            const messages = TestScheduler.parseMarbles(marbles, undefined, undefined, undefined, true);
-            for (const message of messages) {
-                this.schedule(() => {
-                    const now = this.now();
-                    const callbacks = Array.from(map.values());
-                    map.clear();
-                    for (const callback of callbacks) {
-                        callback(now);
-                    }
-                }, message.frame);
+            var messages = TestScheduler.parseMarbles(marbles, undefined, undefined, undefined, true);
+            try {
+                for (var messages_1 = __values(messages), messages_1_1 = messages_1.next(); !messages_1_1.done; messages_1_1 = messages_1.next()) {
+                    var message = messages_1_1.value;
+                    _this.schedule(function () {
+                        var e_2, _a;
+                        var now = _this.now();
+                        var callbacks = Array.from(map.values());
+                        map.clear();
+                        try {
+                            for (var callbacks_1 = (e_2 = void 0, __values(callbacks)), callbacks_1_1 = callbacks_1.next(); !callbacks_1_1.done; callbacks_1_1 = callbacks_1.next()) {
+                                var callback = callbacks_1_1.value;
+                                callback(now);
+                            }
+                        }
+                        catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                        finally {
+                            try {
+                                if (callbacks_1_1 && !callbacks_1_1.done && (_a = callbacks_1.return)) _a.call(callbacks_1);
+                            }
+                            finally { if (e_2) throw e_2.error; }
+                        }
+                    }, message.frame);
+                }
+            }
+            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            finally {
+                try {
+                    if (messages_1_1 && !messages_1_1.done && (_a = messages_1.return)) _a.call(messages_1);
+                }
+                finally { if (e_1) throw e_1.error; }
             }
         };
-        return { animate, delegate };
-    }
-    createDelegates() {
-        let lastHandle = 0;
-        const scheduleLookup = new Map();
-        const run = () => {
-            const now = this.now();
-            const scheduledRecords = Array.from(scheduleLookup.values());
-            const scheduledRecordsDue = scheduledRecords.filter(({ due }) => due <= now);
-            const dueImmediates = scheduledRecordsDue.filter(({ type }) => type === 'immediate');
+        return { animate: animate, delegate: delegate };
+    };
+    TestScheduler.prototype.createDelegates = function () {
+        var _this = this;
+        var lastHandle = 0;
+        var scheduleLookup = new Map();
+        var run = function () {
+            var now = _this.now();
+            var scheduledRecords = Array.from(scheduleLookup.values());
+            var scheduledRecordsDue = scheduledRecords.filter(function (_a) {
+                var due = _a.due;
+                return due <= now;
+            });
+            var dueImmediates = scheduledRecordsDue.filter(function (_a) {
+                var type = _a.type;
+                return type === 'immediate';
+            });
             if (dueImmediates.length > 0) {
-                const { handle, handler } = dueImmediates[0];
+                var _a = dueImmediates[0], handle = _a.handle, handler = _a.handler;
                 scheduleLookup.delete(handle);
                 handler();
                 return;
             }
-            const dueIntervals = scheduledRecordsDue.filter(({ type }) => type === 'interval');
+            var dueIntervals = scheduledRecordsDue.filter(function (_a) {
+                var type = _a.type;
+                return type === 'interval';
+            });
             if (dueIntervals.length > 0) {
-                const firstDueInterval = dueIntervals[0];
-                const { duration, handler } = firstDueInterval;
+                var firstDueInterval = dueIntervals[0];
+                var duration = firstDueInterval.duration, handler = firstDueInterval.handler;
                 firstDueInterval.due = now + duration;
-                firstDueInterval.subscription = this.schedule(run, duration);
+                firstDueInterval.subscription = _this.schedule(run, duration);
                 handler();
                 return;
             }
-            const dueTimeouts = scheduledRecordsDue.filter(({ type }) => type === 'timeout');
+            var dueTimeouts = scheduledRecordsDue.filter(function (_a) {
+                var type = _a.type;
+                return type === 'timeout';
+            });
             if (dueTimeouts.length > 0) {
-                const { handle, handler } = dueTimeouts[0];
+                var _b = dueTimeouts[0], handle = _b.handle, handler = _b.handler;
                 scheduleLookup.delete(handle);
                 handler();
                 return;
             }
             throw new Error('Expected a due immediate or interval');
         };
-        const immediate = {
-            setImmediate: (handler) => {
-                const handle = ++lastHandle;
+        var immediate = {
+            setImmediate: function (handler) {
+                var handle = ++lastHandle;
                 scheduleLookup.set(handle, {
-                    due: this.now(),
+                    due: _this.now(),
                     duration: 0,
-                    handle,
-                    handler,
-                    subscription: this.schedule(run, 0),
+                    handle: handle,
+                    handler: handler,
+                    subscription: _this.schedule(run, 0),
                     type: 'immediate',
                 });
                 return handle;
             },
-            clearImmediate: (handle) => {
-                const value = scheduleLookup.get(handle);
+            clearImmediate: function (handle) {
+                var value = scheduleLookup.get(handle);
                 if (value) {
                     value.subscription.unsubscribe();
                     scheduleLookup.delete(handle);
                 }
             },
         };
-        const interval = {
-            setInterval: (handler, duration = 0) => {
-                const handle = ++lastHandle;
+        var interval = {
+            setInterval: function (handler, duration) {
+                if (duration === void 0) { duration = 0; }
+                var handle = ++lastHandle;
                 scheduleLookup.set(handle, {
-                    due: this.now() + duration,
-                    duration,
-                    handle,
-                    handler,
-                    subscription: this.schedule(run, duration),
+                    due: _this.now() + duration,
+                    duration: duration,
+                    handle: handle,
+                    handler: handler,
+                    subscription: _this.schedule(run, duration),
                     type: 'interval',
                 });
                 return handle;
             },
-            clearInterval: (handle) => {
-                const value = scheduleLookup.get(handle);
+            clearInterval: function (handle) {
+                var value = scheduleLookup.get(handle);
                 if (value) {
                     value.subscription.unsubscribe();
                     scheduleLookup.delete(handle);
                 }
             },
         };
-        const timeout = {
-            setTimeout: (handler, duration = 0) => {
-                const handle = ++lastHandle;
+        var timeout = {
+            setTimeout: function (handler, duration) {
+                if (duration === void 0) { duration = 0; }
+                var handle = ++lastHandle;
                 scheduleLookup.set(handle, {
-                    due: this.now() + duration,
-                    duration,
-                    handle,
-                    handler,
-                    subscription: this.schedule(run, duration),
+                    due: _this.now() + duration,
+                    duration: duration,
+                    handle: handle,
+                    handler: handler,
+                    subscription: _this.schedule(run, duration),
                     type: 'timeout',
                 });
                 return handle;
             },
-            clearTimeout: (handle) => {
-                const value = scheduleLookup.get(handle);
+            clearTimeout: function (handle) {
+                var value = scheduleLookup.get(handle);
                 if (value) {
                     value.subscription.unsubscribe();
                     scheduleLookup.delete(handle);
                 }
             },
         };
-        return { immediate, interval, timeout };
-    }
-    run(callback) {
-        const prevFrameTimeFactor = TestScheduler.frameTimeFactor;
-        const prevMaxFrames = this.maxFrames;
+        return { immediate: immediate, interval: interval, timeout: timeout };
+    };
+    TestScheduler.prototype.run = function (callback) {
+        var prevFrameTimeFactor = TestScheduler.frameTimeFactor;
+        var prevMaxFrames = this.maxFrames;
         TestScheduler.frameTimeFactor = 1;
         this.maxFrames = Infinity;
         this.runMode = true;
-        const animator = this.createAnimator();
-        const delegates = this.createDelegates();
+        var animator = this.createAnimator();
+        var delegates = this.createDelegates();
         animationFrameProvider.delegate = animator.delegate;
         dateTimestampProvider.delegate = this;
         immediateProvider.delegate = delegates.immediate;
         intervalProvider.delegate = delegates.interval;
         timeoutProvider.delegate = delegates.timeout;
         performanceTimestampProvider.delegate = this;
-        const helpers = {
+        var helpers = {
             cold: this.createColdObservable.bind(this),
             hot: this.createHotObservable.bind(this),
             flush: this.flush.bind(this),
@@ -484,7 +546,7 @@ export class TestScheduler extends VirtualTimeScheduler {
             animate: animator.animate,
         };
         try {
-            const ret = callback(helpers);
+            var ret = callback(helpers);
             this.flush();
             return ret;
         }
@@ -499,7 +561,9 @@ export class TestScheduler extends VirtualTimeScheduler {
             timeoutProvider.delegate = undefined;
             performanceTimestampProvider.delegate = undefined;
         }
-    }
-}
-TestScheduler.frameTimeFactor = 10;
+    };
+    TestScheduler.frameTimeFactor = 10;
+    return TestScheduler;
+}(VirtualTimeScheduler));
+export { TestScheduler };
 //# sourceMappingURL=TestScheduler.js.map

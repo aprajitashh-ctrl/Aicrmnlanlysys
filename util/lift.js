@@ -3,7 +3,7 @@ export function hasLift(source) {
     return isFunction(source === null || source === void 0 ? void 0 : source.lift);
 }
 export function operate(init) {
-    return (source) => {
+    return function (source) {
         if (hasLift(source)) {
             return source.lift(function (liftedSource) {
                 try {
