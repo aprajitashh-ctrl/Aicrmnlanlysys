@@ -1,8 +1,8 @@
-import { mergeAll } from '../operators/mergeAll';
-import { innerFrom } from './innerFrom';
-import { EMPTY } from './empty';
+import { __read, __spreadArray } from "tslib";
+import { operate } from '../util/lift';
+import { mergeAll } from './mergeAll';
 import { popNumber, popScheduler } from '../util/args';
-import { from } from './from';
+import { from } from '../observable/from';
 export function merge() {
     var args = [];
     for (var _i = 0; _i < arguments.length; _i++) {
@@ -10,14 +10,8 @@ export function merge() {
     }
     var scheduler = popScheduler(args);
     var concurrent = popNumber(args, Infinity);
-    var sources = args;
-    return !sources.length
-        ?
-            EMPTY
-        : sources.length === 1
-            ?
-                innerFrom(sources[0])
-            :
-                mergeAll(concurrent)(from(sources, scheduler));
+    return operate(function (source, subscriber) {
+        mergeAll(concurrent)(from(__spreadArray([source], __read(args)), scheduler)).subscribe(subscriber);
+    });
 }
 //# sourceMappingURL=merge.js.map
