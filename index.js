@@ -1,168 +1,169 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const { initNeo4j, getGraphData, saveExtractedData, getInsights, getSuspiciousPatterns, searchGraph } = require('./services/neo4jService');
-const { extractEntitiesFromFIR, convertQuestionToCypher } = require('./services/geminiService');
-
-const path = require('path');
-const { getLedger, addBlock, verifyLedger } = require('./services/ledgerService');
-const app = express();
-const PORT = process.env.PORT || 5000;
-
-// Middleware
-app.use(cors());
-app.use(express.json({ limit: '10mb' }));
-
-// Serve static frontend build if present
-const clientDistPath = path.join(__dirname, '../client/dist');
-app.use(express.static(clientDistPath));
-
-
-// Initialize Neo4j Driver Connection
-initNeo4j().catch(err => console.error('[Server] Neo4j init error:', err));
-
-// Health Check
-app.get(['/health', '/api/health'], (req, res) => {
-  res.json({
-    status: 'online',
-    system: 'Criminal Network Analysis System Backend',
-    timestamp: new Date().toISOString(),
-    neo4jConfigured: !!process.env.NEO4J_URI,
-    geminiConfigured: !!process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'your_gemini_api_key_here'
-  });
-});
-
-/**
- * 1. POST /analyze - Accepts text, calls Gemini AI to extract entities & relationships, saves to Neo4j
- */
-app.post(['/analyze', '/api/analyze'], async (req, res) => {
-  try {
-    const { text } = req.body;
-    if (!text || text.trim() === '') {
-      return res.status(400).json({ error: 'FIR/Police report text is required' });
-    }
-
-    console.log(`[API] Received /analyze request (${text.length} chars)`);
-    
-    // Step 1: Extract entities using Gemini API
-    const extractedData = await extractEntitiesFromFIR(text);
-
-    // Step 2: Save extracted graph into Neo4j
-    const saveResult = await saveExtractedData(extractedData);
-    addBlock(`REP-${Date.now()}`, extractedData);
-
-    // Step 3: Fetch updated full graph data
-    const updatedGraph = await getGraphData();
-
-    res.json({
-      success: true,
-      message: 'Entities extracted and criminal network updated in database',
-      extractedData,
-      saveResult,
-      graph: updatedGraph
-    });
-  } catch (error) {
-    console.error('[API] /analyze Error:', error);
-    res.status(500).json({ error: error.message || 'Failed to analyze text' });
-  }
-});
-
-/**
- * 2. GET /graph - Returns all nodes & relationships from Neo4j formatted for force-graph
- */
-app.get(['/graph', '/api/graph'], async (req, res) => {
-  try {
-    const graphData = await getGraphData();
-    res.json(graphData);
-  } catch (error) {
-    console.error('[API] /graph Error:', error);
-    res.status(500).json({ error: 'Failed to fetch graph data' });
-  }
-});
-
-/**
- * 3. GET /insights - Centrality/degree calculation for top 10 Key Influencers
- */
-app.get(['/insights', '/api/insights'], async (req, res) => {
-  try {
-    const insights = await getInsights();
-    res.json(insights);
-  } catch (error) {
-    console.error('[API] /insights Error:', error);
-    res.status(500).json({ error: 'Failed to calculate network insights' });
-  }
-});
-
-/**
- * 4. GET /suspicious - Anomaly detection endpoint for entities with >2x mean degree
- */
-app.get(['/suspicious', '/api/suspicious'], async (req, res) => {
-  try {
-    const suspiciousData = await getSuspiciousPatterns();
-    res.json(suspiciousData);
-  } catch (error) {
-    console.error('[API] /suspicious Error:', error);
-    res.status(500).json({ error: 'Failed to detect suspicious patterns' });
-  }
-});
-
-/**
- * 5. POST /search - Accepts plain English question, converts to Cypher using Gemini, runs search query
- */
-app.post(['/search', '/api/search'], async (req, res) => {
-  try {
-    const { query } = req.body;
-    if (!query || query.trim() === '') {
-      return res.status(400).json({ error: 'Search query is required' });
-    }
-
-    console.log(`[API] Received /search request: "${query}"`);
-
-    // Convert question to Cypher using Gemini
-    const cypherQuery = await convertQuestionToCypher(query);
-    console.log(`[API] Generated Cypher: ${cypherQuery}`);
-
-    // Execute search filter
-    const searchResult = await searchGraph(query);
-
-    res.json({
-      ...searchResult,
-      cypherQuery
-    });
-  } catch (error) {
-    console.error('[API] /search Error:', error);
-    res.status(500).json({ error: 'Search failed' });
-  }
-});
-
-// SPA Catch-all Route
-// Evidence Ledger Endpoints
-app.get('/api/ledger', (req, res) => {
-  res.json(getLedger());
-});
-
-app.post('/api/ledger/verify', (req, res) => {
-  const result = verifyLedger();
-  res.json(result);
-});
-
-app.get('*', (req, res) => {
-  res.sendFile(path.join(clientDistPath, 'index.html'));
-});
-
-// Start Server
-app.listen(PORT, () => {
-  console.log(`
-==================================================================
-  🕵️  CRIMINAL NETWORK ANALYSIS SYSTEM - BACKEND SERVER
-==================================================================
-  Server Running at : http://localhost:${PORT}
-  Health Check     : http://localhost:${PORT}/api/health
-  Graph Endpoint   : http://localhost:${PORT}/api/graph
-  Insights Endpoint: http://localhost:${PORT}/api/insights
-  Suspicious Endpoint: http://localhost:${PORT}/api/suspicious
-==================================================================
-  `);
-});
-
-
+export { Observable } from './internal/Observable';
+export { ConnectableObservable } from './internal/observable/ConnectableObservable';
+export { observable } from './internal/symbol/observable';
+export { animationFrames } from './internal/observable/dom/animationFrames';
+export { Subject } from './internal/Subject';
+export { BehaviorSubject } from './internal/BehaviorSubject';
+export { ReplaySubject } from './internal/ReplaySubject';
+export { AsyncSubject } from './internal/AsyncSubject';
+export { asap, asapScheduler } from './internal/scheduler/asap';
+export { async, asyncScheduler } from './internal/scheduler/async';
+export { queue, queueScheduler } from './internal/scheduler/queue';
+export { animationFrame, animationFrameScheduler } from './internal/scheduler/animationFrame';
+export { VirtualTimeScheduler, VirtualAction } from './internal/scheduler/VirtualTimeScheduler';
+export { Scheduler } from './internal/Scheduler';
+export { Subscription } from './internal/Subscription';
+export { Subscriber } from './internal/Subscriber';
+export { Notification, NotificationKind } from './internal/Notification';
+export { pipe } from './internal/util/pipe';
+export { noop } from './internal/util/noop';
+export { identity } from './internal/util/identity';
+export { isObservable } from './internal/util/isObservable';
+export { lastValueFrom } from './internal/lastValueFrom';
+export { firstValueFrom } from './internal/firstValueFrom';
+export { ArgumentOutOfRangeError } from './internal/util/ArgumentOutOfRangeError';
+export { EmptyError } from './internal/util/EmptyError';
+export { NotFoundError } from './internal/util/NotFoundError';
+export { ObjectUnsubscribedError } from './internal/util/ObjectUnsubscribedError';
+export { SequenceError } from './internal/util/SequenceError';
+export { TimeoutError } from './internal/operators/timeout';
+export { UnsubscriptionError } from './internal/util/UnsubscriptionError';
+export { bindCallback } from './internal/observable/bindCallback';
+export { bindNodeCallback } from './internal/observable/bindNodeCallback';
+export { combineLatest } from './internal/observable/combineLatest';
+export { concat } from './internal/observable/concat';
+export { connectable } from './internal/observable/connectable';
+export { defer } from './internal/observable/defer';
+export { empty } from './internal/observable/empty';
+export { forkJoin } from './internal/observable/forkJoin';
+export { from } from './internal/observable/from';
+export { fromEvent } from './internal/observable/fromEvent';
+export { fromEventPattern } from './internal/observable/fromEventPattern';
+export { generate } from './internal/observable/generate';
+export { iif } from './internal/observable/iif';
+export { interval } from './internal/observable/interval';
+export { merge } from './internal/observable/merge';
+export { never } from './internal/observable/never';
+export { of } from './internal/observable/of';
+export { onErrorResumeNext } from './internal/observable/onErrorResumeNext';
+export { pairs } from './internal/observable/pairs';
+export { partition } from './internal/observable/partition';
+export { race } from './internal/observable/race';
+export { range } from './internal/observable/range';
+export { throwError } from './internal/observable/throwError';
+export { timer } from './internal/observable/timer';
+export { using } from './internal/observable/using';
+export { zip } from './internal/observable/zip';
+export { scheduled } from './internal/scheduled/scheduled';
+export { EMPTY } from './internal/observable/empty';
+export { NEVER } from './internal/observable/never';
+export * from './internal/types';
+export { config } from './internal/config';
+export { audit } from './internal/operators/audit';
+export { auditTime } from './internal/operators/auditTime';
+export { buffer } from './internal/operators/buffer';
+export { bufferCount } from './internal/operators/bufferCount';
+export { bufferTime } from './internal/operators/bufferTime';
+export { bufferToggle } from './internal/operators/bufferToggle';
+export { bufferWhen } from './internal/operators/bufferWhen';
+export { catchError } from './internal/operators/catchError';
+export { combineAll } from './internal/operators/combineAll';
+export { combineLatestAll } from './internal/operators/combineLatestAll';
+export { combineLatestWith } from './internal/operators/combineLatestWith';
+export { concatAll } from './internal/operators/concatAll';
+export { concatMap } from './internal/operators/concatMap';
+export { concatMapTo } from './internal/operators/concatMapTo';
+export { concatWith } from './internal/operators/concatWith';
+export { connect } from './internal/operators/connect';
+export { count } from './internal/operators/count';
+export { debounce } from './internal/operators/debounce';
+export { debounceTime } from './internal/operators/debounceTime';
+export { defaultIfEmpty } from './internal/operators/defaultIfEmpty';
+export { delay } from './internal/operators/delay';
+export { delayWhen } from './internal/operators/delayWhen';
+export { dematerialize } from './internal/operators/dematerialize';
+export { distinct } from './internal/operators/distinct';
+export { distinctUntilChanged } from './internal/operators/distinctUntilChanged';
+export { distinctUntilKeyChanged } from './internal/operators/distinctUntilKeyChanged';
+export { elementAt } from './internal/operators/elementAt';
+export { endWith } from './internal/operators/endWith';
+export { every } from './internal/operators/every';
+export { exhaust } from './internal/operators/exhaust';
+export { exhaustAll } from './internal/operators/exhaustAll';
+export { exhaustMap } from './internal/operators/exhaustMap';
+export { expand } from './internal/operators/expand';
+export { filter } from './internal/operators/filter';
+export { finalize } from './internal/operators/finalize';
+export { find } from './internal/operators/find';
+export { findIndex } from './internal/operators/findIndex';
+export { first } from './internal/operators/first';
+export { groupBy } from './internal/operators/groupBy';
+export { ignoreElements } from './internal/operators/ignoreElements';
+export { isEmpty } from './internal/operators/isEmpty';
+export { last } from './internal/operators/last';
+export { map } from './internal/operators/map';
+export { mapTo } from './internal/operators/mapTo';
+export { materialize } from './internal/operators/materialize';
+export { max } from './internal/operators/max';
+export { mergeAll } from './internal/operators/mergeAll';
+export { flatMap } from './internal/operators/flatMap';
+export { mergeMap } from './internal/operators/mergeMap';
+export { mergeMapTo } from './internal/operators/mergeMapTo';
+export { mergeScan } from './internal/operators/mergeScan';
+export { mergeWith } from './internal/operators/mergeWith';
+export { min } from './internal/operators/min';
+export { multicast } from './internal/operators/multicast';
+export { observeOn } from './internal/operators/observeOn';
+export { onErrorResumeNextWith } from './internal/operators/onErrorResumeNextWith';
+export { pairwise } from './internal/operators/pairwise';
+export { pluck } from './internal/operators/pluck';
+export { publish } from './internal/operators/publish';
+export { publishBehavior } from './internal/operators/publishBehavior';
+export { publishLast } from './internal/operators/publishLast';
+export { publishReplay } from './internal/operators/publishReplay';
+export { raceWith } from './internal/operators/raceWith';
+export { reduce } from './internal/operators/reduce';
+export { repeat } from './internal/operators/repeat';
+export { repeatWhen } from './internal/operators/repeatWhen';
+export { retry } from './internal/operators/retry';
+export { retryWhen } from './internal/operators/retryWhen';
+export { refCount } from './internal/operators/refCount';
+export { sample } from './internal/operators/sample';
+export { sampleTime } from './internal/operators/sampleTime';
+export { scan } from './internal/operators/scan';
+export { sequenceEqual } from './internal/operators/sequenceEqual';
+export { share } from './internal/operators/share';
+export { shareReplay } from './internal/operators/shareReplay';
+export { single } from './internal/operators/single';
+export { skip } from './internal/operators/skip';
+export { skipLast } from './internal/operators/skipLast';
+export { skipUntil } from './internal/operators/skipUntil';
+export { skipWhile } from './internal/operators/skipWhile';
+export { startWith } from './internal/operators/startWith';
+export { subscribeOn } from './internal/operators/subscribeOn';
+export { switchAll } from './internal/operators/switchAll';
+export { switchMap } from './internal/operators/switchMap';
+export { switchMapTo } from './internal/operators/switchMapTo';
+export { switchScan } from './internal/operators/switchScan';
+export { take } from './internal/operators/take';
+export { takeLast } from './internal/operators/takeLast';
+export { takeUntil } from './internal/operators/takeUntil';
+export { takeWhile } from './internal/operators/takeWhile';
+export { tap } from './internal/operators/tap';
+export { throttle } from './internal/operators/throttle';
+export { throttleTime } from './internal/operators/throttleTime';
+export { throwIfEmpty } from './internal/operators/throwIfEmpty';
+export { timeInterval } from './internal/operators/timeInterval';
+export { timeout } from './internal/operators/timeout';
+export { timeoutWith } from './internal/operators/timeoutWith';
+export { timestamp } from './internal/operators/timestamp';
+export { toArray } from './internal/operators/toArray';
+export { window } from './internal/operators/window';
+export { windowCount } from './internal/operators/windowCount';
+export { windowTime } from './internal/operators/windowTime';
+export { windowToggle } from './internal/operators/windowToggle';
+export { windowWhen } from './internal/operators/windowWhen';
+export { withLatestFrom } from './internal/operators/withLatestFrom';
+export { zipAll } from './internal/operators/zipAll';
+export { zipWith } from './internal/operators/zipWith';
+//# sourceMappingURL=index.js.map
