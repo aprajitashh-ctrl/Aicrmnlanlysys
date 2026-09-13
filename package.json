@@ -1,26 +1,18 @@
 {
-  "name": "criminal-network-analysis-client",
-  "private": true,
+  "name": "criminal-network-analysis-server",
   "version": "1.0.0",
-  "type": "module",
+  "description": "Backend server for Criminal Network Analysis System using Express, Neo4j, and Gemini API",
+  "main": "index.js",
+  "type": "commonjs",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "start": "node index.js",
+    "dev": "node --watch index.js"
   },
   "dependencies": {
-    "canvas-confetti": "^1.9.4",
-    "leaflet": "^1.9.4",
-    "lucide-react": "^0.439.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-force-graph-2d": "^1.25.7",
-    "react-leaflet": "^4.2.1"
-  },
-  "devDependencies": {
-    "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0",
-    "@vitejs/plugin-react": "^4.3.1",
-    "vite": "^5.4.1"
+    "@google/generative-ai": "^0.21.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "neo4j-driver": "^5.23.0"
   }
 }

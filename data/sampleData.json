@@ -1,0 +1,74 @@
+{
+  "nodes": [
+    { "id": "p1", "name": "Vikram Malhotra (Kingpin)", "type": "Person", "details": "Prime accused in syndicate extortion & illegal hawala networks" },
+    { "id": "p2", "name": "Rahul Sharma", "type": "Person", "details": "Co-accused, operates hawala transactions in North zone" },
+    { "id": "p3", "name": "Amit 'Chhota' Patel", "type": "Person", "details": "Enforcer & field operator for contraband transport" },
+    { "id": "p4", "name": "Suresh Raina", "type": "Person", "details": "Financial accountant managing shell accounts" },
+    { "id": "p5", "name": "Priya Verma", "type": "Person", "details": "Telecom dealer supplying unverified SIM cards" },
+    { "id": "p6", "name": "Deepak Rao", "type": "Person", "details": "Logistics coordinator at Nhava Sheva port" },
+    { "id": "p7", "name": "Karan Johar (Alias)", "type": "Person", "details": "Crypto exchange broker handling USDT payouts" },
+    { "id": "p8", "name": "Sanjay Gupta", "type": "Person", "details": "Warehouse supervisor & stock keeper" },
+
+    { "id": "l1", "name": "Warehouse 14 - Nhava Sheva Port", "type": "Location", "details": "Primary contraband storage facility" },
+    { "id": "l2", "name": "Sector 18 Cyber Hub - Gurugram", "type": "Location", "details": "Call center front for phishing operations" },
+    { "id": "l3", "name": "Hotel Trident Suite 402 - Mumbai", "type": "Location", "details": "Meeting site for syndicate leaders" },
+    { "id": "l4", "name": "Safehouse B - Panvel", "type": "Location", "details": "Weaponry and cash staging area" },
+
+    { "id": "ph1", "name": "+91-98765-43210", "type": "PhoneNumber", "details": "High-frequency burner line detected in 14 FIRs" },
+    { "id": "ph2", "name": "+91-98111-22334", "type": "PhoneNumber", "details": "Encrypted VoIP gateway number" },
+    { "id": "ph3", "name": "+91-99887-76655", "type": "PhoneNumber", "details": "SIM registered under fake ID (Priya Verma)" },
+    { "id": "ph4", "name": "+91-97123-45678", "type": "PhoneNumber", "details": "Direct contact line for Rahul Sharma" },
+
+    { "id": "v1", "name": "MH-02-CZ-9988 (Black SUV)", "type": "Vehicle", "details": "Getaway vehicle spotted at extortion site" },
+    { "id": "v2", "name": "HR-26-DQ-4321 (Container Truck)", "type": "Vehicle", "details": "Used for moving illicit shipments" },
+    { "id": "v3", "name": "DL-01-AB-1234 (White Sedan)", "type": "Vehicle", "details": "Registered to Shadow Logistics" },
+
+    { "id": "o1", "name": "Shadow Logistics Pvt Ltd", "type": "Organization", "details": "Front logistics company for contraband transport" },
+    { "id": "o2", "name": "Apex Shell Holdings", "type": "Organization", "details": "Offshore entity used for money laundering" },
+    { "id": "o3", "name": "DarkNet Pay Gateway", "type": "Organization", "details": "Illegal peer-to-peer crypto payment exchange" }
+  ],
+  "links": [
+    { "source": "p1", "target": "p2", "type": "CO_ACCUSED_WITH" },
+    { "source": "p1", "target": "p3", "type": "COMMANDS" },
+    { "source": "p1", "target": "p4", "type": "EMPLOYED" },
+    { "source": "p1", "target": "ph1", "type": "USES_BURNER_PHONE" },
+    { "source": "p1", "target": "v1", "type": "OWNED_BY" },
+    { "source": "p1", "target": "l3", "type": "MET_AT" },
+    { "source": "p1", "target": "o2", "type": "BENEFICIAL_OWNER" },
+
+    { "source": "p2", "target": "ph1", "type": "CALLED" },
+    { "source": "p2", "target": "ph4", "type": "REGISTERED_OWNER" },
+    { "source": "p2", "target": "l2", "type": "OPERATES_FROM" },
+    { "source": "p2", "target": "o2", "type": "TRANSFERRED_FUNDS" },
+
+    { "source": "p3", "target": "v1", "type": "DROVE" },
+    { "source": "p3", "target": "v2", "type": "INTERCEPTED_IN" },
+    { "source": "p3", "target": "l4", "type": "STAYED_AT" },
+    { "source": "p3", "target": "ph1", "type": "CALLED" },
+
+    { "source": "p4", "target": "o1", "type": "MANAGES_ACCOUNTS" },
+    { "source": "p4", "target": "o2", "type": "WIRED_MONEY_TO" },
+    { "source": "p4", "target": "p7", "type": "PAID_CRYPTO" },
+
+    { "source": "p5", "target": "ph1", "type": "ACTIVATED_SIM" },
+    { "source": "p5", "target": "ph2", "type": "ACTIVATED_SIM" },
+    { "source": "p5", "target": "ph3", "type": "ACTIVATED_SIM" },
+
+    { "source": "p6", "target": "l1", "type": "STATIONED_AT" },
+    { "source": "p6", "target": "o1", "type": "EMPLOYED_BY" },
+    { "source": "p6", "target": "v2", "type": "DISPATCHED" },
+    { "source": "p6", "target": "ph1", "type": "CALLED" },
+
+    { "source": "p7", "target": "o3", "type": "OPERATES" },
+    { "source": "p7", "target": "ph2", "type": "USES" },
+
+    { "source": "p8", "target": "l1", "type": "SUPERVISES" },
+    { "source": "p8", "target": "p6", "type": "REPORTS_TO" },
+    { "source": "p8", "target": "p3", "type": "HANDED_OVER_GOODS" },
+
+    { "source": "ph1", "target": "ph2", "type": "FORWARDED_CALLS" },
+    { "source": "ph1", "target": "ph3", "type": "FREQUENT_CALLS" },
+    { "source": "v3", "target": "o1", "type": "REGISTERED_TO" },
+    { "source": "l1", "target": "o1", "type": "LEASED_BY" }
+  ]
+}

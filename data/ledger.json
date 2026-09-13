@@ -1,0 +1,20 @@
+[
+  {
+    "id": 0,
+    "timestamp": "2026-09-12T11:40:04.535Z",
+    "reportId": "GENESIS",
+    "dataPayload": "GENESIS_BLOCK",
+    "previousHash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "hash": "bbd21ad3f0764cc3c35dbbcf1d8d8b29b09a58a2e2f43611e2d0c0232079da84",
+    "status": "verified"
+  },
+  {
+    "id": 1,
+    "timestamp": "2026-09-12T13:19:42.510Z",
+    "reportId": "REP-1789219182508",
+    "dataPayload": "{\"people\":[\"Vikram Malhotra\",\"Rahul Sharma\",\"Amit Patel\",\"Suresh Raina\",\"Priya Verma\"],\"locations\":[\"Gurugram\",\"Cyber Hub\",\"Hotel Trident\",\"Mumbai\",\"Panvel\",\"Safehouse B\"],\"phoneNumbers\":[],\"vehicles\":[\"Fortuner\",\"MH-02-CZ-9988\"],\"organizations\":[\"Apex Shell Holdings\",\"Crime Branch\"],\"relationships\":[{\"from\":\"Vikram Malhotra\",\"to\":\"Rahul Sharma\",\"type\":\"CO_ACCUSED\"},{\"from\":\"Vikram Malhotra\",\"to\":\"Gurugram\",\"type\":\"MET_AT\"},{\"from\":\"Vikram Malhotra\",\"to\":\"Fortuner\",\"type\":\"OPERATED\"}]}",
+    "previousHash": "bbd21ad3f0764cc3c35dbbcf1d8d8b29b09a58a2e2f43611e2d0c0232079da84",
+    "status": "verified",
+    "hash": "2071327533bb3208406a7f351d9d5d03f503099352ea5c7690d9320fd133b98f"
+  }
+]
