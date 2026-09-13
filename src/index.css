@@ -1,0 +1,234 @@
+@layer base {
+@layer base {
+  :root {
+    /* Original Vibrant Dark Theme */
+    --bg-main: #0B0F19;
+    --bg-card: #0F172A;
+    --bg-card-hover: #1E293B;
+    --bg-header: #0F172A;
+    --border-color: rgba(255, 255, 255, 0.1);
+
+    --text-main: #F8FAFC;
+    --text-muted: #94A3B8;
+    --text-dim: #64748B;
+
+    --accent-primary: #00f0ff;
+    --accent-primary-hover: #0EA5A0;
+    --accent-glow: rgba(0, 240, 255, 0.25);
+    
+    --accent-gradient: linear-gradient(135deg, #a855f7, #ec4899);
+
+    /* Status/Entity Colors */
+    --accent-gold: #C9A66B;
+    --accent-blue: #3b82f6;
+    --accent-green: #10b981;
+    --accent-orange: #f97316;
+    --accent-red: #ef4444;
+    --accent-purple: #a855f7;
+  }
+
+  [data-theme="light"] {
+    /* Warm Light Theme */
+    --bg-main: #F4F3EE;
+    --bg-card: #FFFFFF;
+    --bg-card-hover: #F9FAFB;
+    --bg-header: #1A1F2E;
+    --border-color: #E0DED5;
+
+    --text-main: #1A1F2E;
+    --text-muted: #6B7280;
+    --text-dim: #9CA3AF;
+
+    --accent-primary: #00f0ff;
+    --accent-primary-hover: #0EA5A0;
+    --accent-glow: rgba(0, 240, 255, 0.15);
+    
+    --accent-gradient: linear-gradient(135deg, #a855f7, #ec4899);
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+code, pre, .font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--text-muted);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-dim);
+}
+
+/* Tactical Card / Flat Panels */
+.tactical-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  transition: all 0.2s ease-in-out;
+}
+
+.tactical-card:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+[data-theme="light"] .tactical-card:hover {
+  border-color: #D1D5DB;
+}
+
+.tactical-card-active {
+  border-color: var(--accent-primary) !important;
+  box-shadow: 0 4px 16px var(--accent-glow);
+}
+
+/* Glowing Elements for Original Dark Look */
+.glow-cyan {
+  color: var(--accent-primary);
+  text-shadow: 0 0 8px var(--accent-glow);
+}
+.glow-box-cyan {
+  border: 1px solid var(--accent-primary);
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+.glow-box-red {
+  border: 1px solid var(--accent-red);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+}
+
+/* Pulse Animation */
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.8; transform: scale(1); box-shadow: 0 0 8px var(--accent-glow); }
+  50% { opacity: 1; transform: scale(1.03); box-shadow: 0 0 15px var(--accent-glow); }
+}
+.animate-pulse-glow {
+  animation: pulseGlow 2.5s infinite ease-in-out;
+}
+
+/* Buttons */
+.btn-primary {
+  background: var(--accent-primary);
+  color: #0F172A;
+  font-weight: 700;
+  border: 1px solid var(--accent-primary);
+  border-radius: 20px;
+  padding: 8px 16px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  box-shadow: 0 4px 12px var(--accent-glow);
+}
+.btn-primary:hover {
+  background: var(--accent-primary-hover);
+  border-color: var(--accent-primary-hover);
+  box-shadow: 0 4px 16px var(--accent-glow);
+}
+
+.btn-secondary {
+  background: var(--bg-card);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 8px 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  font-size: 13px;
+}
+.btn-secondary:hover {
+  background: #F9FAFB;
+}
+.btn-secondary.active {
+  background: var(--accent-indigo);
+  border-color: var(--accent-indigo);
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+}
+
+/* Badge Styles */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.badge-person { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+.badge-location { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+.badge-phone { background: rgba(249, 115, 22, 0.15); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.3); }
+.badge-vehicle { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+.badge-org { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); }
+
+/* Layout Grid */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 220px 1fr 260px;
+  grid-template-rows: calc(100vh - 78px);
+  gap: 12px;
+  padding: 12px;
+}
+
+@media (max-width: 1280px) {
+  .dashboard-grid {
+    grid-template-columns: 200px 1fr 240px;
+  }
+}
+
+/* Leaflet Theme Overrides */
+
+/* Make the attribution control tiny and unobtrusive */
+.leaflet-control-attribution {
+  background: rgba(255, 255, 255, 0.45) !important;
+  backdrop-filter: blur(4px);
+  border-radius: 4px 0 0 0 !important;
+  font-size: 9px !important;
+  padding: 2px 5px !important;
+  opacity: 0.55;
+  transition: opacity 0.2s;
+}
+.leaflet-control-attribution:hover {
+  opacity: 0.85;
+}
+.leaflet-control-attribution a {
+  color: #334155 !important;
+}
+
+/* Tactical tooltip — transparent wrapper */
+.leaflet-tooltip.tactical-leaflet-tooltip {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+.leaflet-tooltip-top:before {
+  border-top-color: rgba(14, 165, 233, 0.5) !important;
+}
